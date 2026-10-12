@@ -1,537 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chemical SDS Library</title>
-    <style>
-      :root {
-        --bg: #f3f6fb;
-        --panel: rgba(255, 255, 255, 0.88);
-        --panel-solid: #ffffff;
-        --primary: #123b73;
-        --primary-2: #1f5aa6;
-        --accent: #0f7a6d;
-        --text: #172033;
-        --muted: #5d6a80;
-        --border: #dbe4f0;
-        --shadow: 0 18px 40px rgba(18, 59, 115, 0.12);
-      }
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chemical SDS Library</title>
+<style>
+:root{--bg:#f3f6fb;--panel:rgba(255,255,255,.88);--primary:#123b73;--primary-2:#1f5aa6;--text:#172033;--muted:#5d6a80;--border:#dbe4f0;--shadow:0 18px 40px rgba(18,59,115,.12)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);background:radial-gradient(circle at top left,rgba(18,59,115,.14),transparent 35%),radial-gradient(circle at top right,rgba(15,122,109,.12),transparent 30%),linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%)}
+.container{max-width:1280px;margin:0 auto;padding:28px 18px 64px}
+.hero{border-radius:26px;padding:34px 30px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:var(--shadow)}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.eyebrow{display:inline-block;padding:7px 12px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(255,255,255,.08);font-size:.82rem;margin-bottom:16px}
+h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
+.hero p{margin:0;max-width:820px;line-height:1.65;color:rgba(255,255,255,.92)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(110px,1fr));gap:12px;min-width:330px}
+.stat{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16)}
+.stat strong{display:block;font-size:1.35rem}
+.stat span{font-size:.82rem;color:rgba(255,255,255,.88)}
+.toolbar{position:sticky;top:0;z-index:10;margin:22px 0 0;padding:12px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.92);box-shadow:var(--shadow)}
+.search-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.search-box{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--border)}
+.search-box input{width:100%;border:0;outline:none;font-size:1rem;color:var(--text);background:transparent}
+.button{border:1px solid var(--border);background:#fff;color:var(--text);border-radius:12px;padding:12px 14px;font-weight:700;cursor:pointer}
+.meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 4px 0;color:var(--muted);font-size:.92rem}
+.section-grid{margin-top:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;align-items:start}
+.category{background:var(--panel);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
+.category.hidden{display:none}
+.category-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.category h2{margin:0;font-size:1.08rem;color:var(--primary)}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:28px;padding:0 10px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:.8rem;font-weight:800}
+.docs{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.docs li{border-radius:14px;border:1px solid var(--border);background:#fff;transition:.18s}
+.docs li:hover{transform:translateY(-1px);border-color:#bfcde2;box-shadow:0 10px 18px rgba(18,59,115,.08)}
+.docs a{display:flex;align-items:center;gap:12px;padding:12px 14px;color:var(--text);text-decoration:none;line-height:1.45}
+.tag{display:inline-flex;justify-content:center;min-width:54px;padding:5px 10px;border-radius:999px;font-size:.72rem;font-weight:800;text-transform:uppercase}
+.tag.sds{background:#e5f7f2;color:#0f7a6d}.tag.msds{background:#fff2df;color:#b76a1f}.tag.tds{background:#e8f0ff;color:var(--primary)}
+.doc-title{display:block;font-size:.95rem;font-weight:600}
+.doc-sub{display:block;margin-top:2px;color:var(--muted);font-size:.82rem}
+.empty{display:none;margin-top:24px;padding:18px;border-radius:16px;border:1px dashed #c8d6ea;color:var(--muted);background:rgba(255,255,255,.7);text-align:center}
+.footer{margin-top:28px;text-align:center;color:var(--muted);font-size:.9rem}
+@media(max-width:740px){.hero{padding:24px 18px}.stats{min-width:100%}.search-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="container">
+  <section class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="eyebrow">Chemical SDS Library &bull; GitHub Pages</div>
+        <h1>Chemical SDS Library</h1>
+        <p>Browse Safety Data Sheets, Material Safety Data Sheets, and Technical Data Sheets in one organized, searchable library. Use the search box to quickly find a product, then open the document in a new tab.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><strong id="totalCount">0</strong><span>Documents</span></div>
+        <div class="stat"><strong id="catCount">0</strong><span>Categories</span></div>
+        <div class="stat"><strong>New tab</strong><span>Open behavior</span></div>
+      </div>
+    </div>
+  </section>
 
-      * { box-sizing: border-box; }
+  <section class="toolbar">
+    <div class="search-row">
+      <label class="search-box" for="searchInput">
+        <span aria-hidden="true">&#128269;</span>
+        <input id="searchInput" type="text" placeholder="Search by product name, category, SDS, MSDS, or TDS..." autocomplete="off" />
+      </label>
+      <button class="button" id="clearBtn" type="button">Clear search</button>
+    </div>
+    <div class="meta">
+      <span>Showing <strong id="visibleCount">0</strong> of <strong id="totalInline">0</strong> files</span>
+      <span>Click any file to open it in a new browser tab</span>
+    </div>
+  </section>
 
-      html { scroll-behavior: smooth; }
+  <section class="section-grid" id="catalog"></section>
+  <div class="empty" id="emptyState">No documents matched your search. Try a different product name or document type.</div>
+  <footer class="footer"><p>All documents open in a new tab.</p></footer>
+</main>
 
-      body {
-        margin: 0;
-        font-family: Inter, Arial, Helvetica, sans-serif;
-        color: var(--text);
-        background:
-          radial-gradient(circle at top left, rgba(18,59,115,0.14), transparent 35%),
-          radial-gradient(circle at top right, rgba(15,122,109,0.12), transparent 30%),
-          linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
-      }
+<script>
+// PDFs live in the repository root, which GitHub Pages (/docs) cannot serve,
+// so each link points to the file's GitHub page and opens in a new tab.
+const BASE = 'https://github.com/Sasos-ops/Chemical-SDS-Library/blob/main/';
 
-      .container {
-        max-width: 1280px;
-        margin: 0 auto;
-        padding: 28px 18px 64px;
-      }
+// [file, title, type]
+const DATA = {
+  'Adhesives & Sealants': [
+    ['101501_WEICON_F_Epoxy_Resin_SDS.pdf','101501 WEICON F Epoxy Resin','SDS'],
+    ['101502_WEICON_F_Epoxy_Hardener_SDS.pdf','101502 WEICON F Epoxy Hardener','SDS'],
+    ['103501_Weicon_WR2_Resin_SDS.pdf','103501 Weicon WR2 Resin','SDS'],
+    ['Hylomar_Universal_Blue_SDS.pdf','Hylomar Universal Blue','SDS'],
+    ['Loctite_243_SDS.PDF','Loctite 243','SDS'],
+    ['Loctite_401_SDS.PDF','Loctite 401','SDS'],
+    ['Loctite_510_SDS.pdf','Loctite 510','SDS'],
+    ['Loctite_577_SDS.pdf','Loctite 577','SDS'],
+    ['Loctite_641_SDS.PDF','Loctite 641','SDS'],
+    ['Permatex_Red_Silicone_81160_SDS.pdf','Permatex Red Silicone 81160','SDS'],
+    ['Wurth_White_Silicone_SDS.PDF','Wurth White Silicone','SDS'],
+    ['Weicon_AntiSeize_HighTech_Assembly_Paste_SDS.pdf','Weicon AntiSeize HighTech Assembly Paste','SDS'],
+    ['Weicon_Leak_Spray_SDS.pdf','Weicon Leak Spray','SDS']
+  ],
+  'Lubricants & Greases': [
+    ['ADNOC_Grease_SDS.pdf','ADNOC Grease','SDS'],
+    ['Bechem_High_Lub_LT2_EP_MSDS.pdf','Bechem High Lub LT2 EP','MSDS'],
+    ['Chemico_Grinding_Paste_SDS.pdf','Chemico Grinding Paste','SDS'],
+    ['Copaslip_AntiSeize_SDS.pdf','Copaslip AntiSeize','SDS'],
+    ['Cutlight_VC212_Cutting_Oil_MSDS.PDF','Cutlight VC212 Cutting Oil','MSDS'],
+    ['Diamant_Lapping_Paste_SDS.pdf','Diamant Lapping Paste','SDS'],
+    ['Molykote_111_Compound_SDS.pdf','Molykote 111 Compound','SDS'],
+    ['Molykote_55_ORing_Grease_SDS.pdf','Molykote 55 O-Ring Grease','SDS'],
+    ['Molykote_GnPlus_Paste_SDS.pdf','Molykote GN Plus Paste','SDS'],
+    ['Molykote_P37_AntiSeize_Paste_SDS.pdf','Molykote P37 AntiSeize Paste','SDS'],
+    ['SKF_LGHP2_Grease_SDS.pdf','SKF LGHP2 Grease','SDS']
+  ],
+  'Coatings & Paints': [
+    ['ASMACO_Spray_Paint_SDS.pdf','ASMACO Spray Paint','SDS'],
+    ['Berger_Luxathane_5160_Hardener_SDS.pdf','Berger Luxathane 5160 Hardener','SDS'],
+    ['Jotun_Hardtop_XP_Component_A_SDS.pdf','Jotun Hardtop XP Component A','SDS'],
+    ['Jotun_Hardtop_XP_Component_B_SDS.pdf','Jotun Hardtop XP Component B','SDS'],
+    ['Jotun_Solvalitt_Aluminium_SDS.pdf','Jotun Solvalitt Aluminium','SDS'],
+    ['National_Synthetic_Enamel_SDS.pdf','National Synthetic Enamel','SDS'],
+    ['National_Thinner.pdf','National Thinner','SDS'],
+    ['Permatex_Prussian_Blue_80038_MSDS.pdf','Permatex Prussian Blue 80038','MSDS'],
+    ['WEICON_Keramik_BL_Hardener.pdf','WEICON Keramik BL Hardener','SDS'],
+    ['WEICON_Keramik_BL_Resin.pdf','WEICON Keramik BL Resin','SDS'],
+    ['WEICON_WL_Hardener.pdf','WEICON WL Hardener','SDS'],
+    ['WEICON_WL_Resin.pdf','WEICON WL Resin','SDS'],
+    ['WEICON_WR2_Hardener.pdf','WEICON WR2 Hardener','SDS']
+  ],
+  'Cleaners, Corrosion & Rust Removal': [
+    ['Ambersil_Corrosion_Inhibitor_SDS.pdf','Ambersil Corrosion Inhibitor','SDS'],
+    ['Chemex_Degreaser_Liquid_DG226_Datasheet.pdf','Chemex Degreaser Liquid DG226','TDS'],
+    ['Diesel_SDS.PDF','Diesel','SDS'],
+    ['Unispec_Rust_Remover_SDS.pdf','Unispec Rust Remover','SDS'],
+    ['Unispec_Rust_Remover_TDS.pdf','Unispec Rust Remover','TDS'],
+    ['WD40_MultiUse_Product_Aerosol_SDS.pdf','WD-40 MultiUse Product Aerosol','SDS'],
+    ['WD40_MultiUse_Product_SDS.pdf','WD-40 MultiUse Product','SDS'],
+    ['Weicon_Cleaner_Spray_S_SDS.pdf','Weicon Cleaner Spray S','SDS']
+  ],
+  'NDT & Inspection': [
+    ['Magnaflux_Spotcheck_Penetrant_SKL_WP2_SDS.pdf','Magnaflux Spotcheck Penetrant SKL WP2','SDS'],
+    ['Magnaflux_Spotcheck_SKC_S_SDS.pdf','Magnaflux Spotcheck SKC S','SDS'],
+    ['Magnaflux_Spotcheck_SKD_S2_SDS.pdf','Magnaflux Spotcheck SKD S2','SDS'],
+    ['Magnaflux_Spotcheck_SKL_SP2_SDS.pdf','Magnaflux Spotcheck SKL SP2','SDS'],
+    ['Magnaflux_Spotcheck_SKL_WP2_SDS.pdf','Magnaflux Spotcheck SKL WP2','SDS']
+  ],
+  'Corrosion Inhibitors (Cortec)': [
+    ['Cortec_VpCI_368_SDS.pdf','Cortec VpCI 368','SDS'],
+    ['Cortec_VpCI_414_SDS.pdf','Cortec VpCI 414','SDS']
+  ]
+};
 
-      .hero {
-        position: relative;
-        overflow: hidden;
-        border-radius: 26px;
-        padding: 34px 30px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-2));
-        color: #fff;
-        box-shadow: var(--shadow);
-      }
+const catalog = document.getElementById('catalog');
+const searchInput = document.getElementById('searchInput');
+const clearBtn = document.getElementById('clearBtn');
+const emptyState = document.getElementById('emptyState');
 
-      .hero::after {
-        content: "";
-        position: absolute;
-        inset: auto -10% -60% auto;
-        width: 340px;
-        height: 340px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.12);
-        filter: blur(2px);
-      }
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let total = 0;
 
-      .hero-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 24px;
-        flex-wrap: wrap;
-      }
+Object.entries(DATA).forEach(([cat, items]) => {
+  total += items.length;
+  const art = document.createElement('article');
+  art.className = 'category';
+  art.innerHTML = '<div class="category-header"><h2>' + esc(cat) + '</h2><span class="pill count">0</span></div><ul class="docs"></ul>';
+  const ul = art.querySelector('.docs');
+  items.forEach(([file, title, type]) => {
+    const li = document.createElement('li');
+    const href = BASE + encodeURIComponent(file);
+    li.dataset.search = (title + ' ' + type + ' ' + cat + ' ' + file).toLowerCase();
+    li.innerHTML = '<a href="' + href + '" target="_blank" rel="noopener noreferrer"><span class="tag ' + type.toLowerCase() + '">' + type + '</span><span><span class="doc-title">' + esc(title) + '</span><span class="doc-sub">' + type + ' &bull; ' + esc(cat) + '</span></span></a>';
+    ul.appendChild(li);
+  });
+  catalog.appendChild(art);
+});
 
-      .eyebrow {
-        display: inline-flex;
-        gap: 8px;
-        align-items: center;
-        padding: 7px 12px;
-        border: 1px solid rgba(255,255,255,0.22);
-        border-radius: 999px;
-        background: rgba(255,255,255,0.08);
-        font-size: 0.82rem;
-        letter-spacing: 0.02em;
-        margin-bottom: 16px;
-      }
+document.getElementById('totalCount').textContent = total;
+document.getElementById('totalInline').textContent = total;
+document.getElementById('catCount').textContent = Object.keys(DATA).length;
 
-      h1 {
-        margin: 0 0 10px;
-        font-size: clamp(2rem, 4vw, 3.3rem);
-        line-height: 1.1;
-      }
+function filterCatalog() {
+  const term = searchInput.value.trim().toLowerCase();
+  let visible = 0;
+  catalog.querySelectorAll('.category').forEach(cat => {
+    let n = 0;
+    cat.querySelectorAll('.docs li').forEach(li => {
+      const show = !term || li.dataset.search.includes(term);
+      li.style.display = show ? '' : 'none';
+      if (show) n++;
+    });
+    cat.querySelector('.count').textContent = n;
+    cat.classList.toggle('hidden', n === 0);
+    visible += n;
+  });
+  document.getElementById('visibleCount').textContent = visible;
+  emptyState.style.display = visible === 0 ? 'block' : 'none';
+}
 
-      .hero p {
-        margin: 0;
-        max-width: 820px;
-        line-height: 1.65;
-        color: rgba(255,255,255,0.92);
-        font-size: 1rem;
-      }
-
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(110px, 1fr));
-        gap: 12px;
-        min-width: 330px;
-      }
-
-      .stat {
-        padding: 14px 16px;
-        border-radius: 18px;
-        background: rgba(255,255,255,0.12);
-        border: 1px solid rgba(255,255,255,0.16);
-        backdrop-filter: blur(12px);
-      }
-
-      .stat strong {
-        display: block;
-        font-size: 1.35rem;
-        margin-bottom: 2px;
-      }
-
-      .stat span {
-        font-size: 0.82rem;
-        color: rgba(255,255,255,0.88);
-      }
-
-      .toolbar {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        margin: 22px 0 0;
-        padding: 12px;
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        background: rgba(255,255,255,0.85);
-        backdrop-filter: blur(14px);
-        box-shadow: var(--shadow);
-      }
-
-      .search-row {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 10px;
-        align-items: center;
-      }
-
-      .search-box {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 14px 16px;
-        border-radius: 14px;
-        background: var(--panel-solid);
-        border: 1px solid var(--border);
-      }
-
-      .search-box svg {
-        flex: 0 0 auto;
-        color: var(--muted);
-      }
-
-      .search-box input {
-        width: 100%;
-        border: 0;
-        outline: none;
-        font-size: 1rem;
-        color: var(--text);
-        background: transparent;
-      }
-
-      .search-actions {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .button {
-        border: 1px solid var(--border);
-        background: var(--panel-solid);
-        color: var(--text);
-        border-radius: 12px;
-        padding: 12px 14px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: 0.18s ease;
-      }
-
-      .button:hover {
-        transform: translateY(-1px);
-        border-color: #c4d3ea;
-      }
-
-      .meta {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin: 16px 4px 0;
-        color: var(--muted);
-        font-size: 0.92rem;
-      }
-
-      .section-grid {
-        margin-top: 24px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 22px;
-      }
-
-      .category {
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 22px;
-        padding: 18px;
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(10px);
-      }
-
-      .category.hidden {
-        display: none;
-      }
-
-      .category-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 14px;
-      }
-
-      .category h2 {
-        margin: 0;
-        font-size: 1.08rem;
-        color: var(--primary);
-      }
-
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 42px;
-        height: 28px;
-        padding: 0 10px;
-        border-radius: 999px;
-        background: #eef4ff;
-        color: var(--primary);
-        font-size: 0.8rem;
-        font-weight: 800;
-      }
-
-      .docs {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: grid;
-        gap: 10px;
-      }
-
-      .docs li {
-        border-radius: 14px;
-        border: 1px solid var(--border);
-        background: #fff;
-        transition: 0.18s ease;
-      }
-
-      .docs li:hover {
-        transform: translateY(-1px);
-        border-color: #bfcde2;
-        box-shadow: 0 10px 18px rgba(18,59,115,0.08);
-      }
-
-      .docs a {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 14px;
-        color: var(--text);
-        text-decoration: none;
-        line-height: 1.45;
-      }
-
-      .tag {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 54px;
-        padding: 5px 10px;
-        border-radius: 999px;
-        font-size: 0.72rem;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        flex: 0 0 auto;
-      }
-
-      .tag.sds { background: #e5f7f2; color: #0f7a6d; }
-      .tag.msds { background: #fff2df; color: #b76a1f; }
-      .tag.tds { background: #e8f0ff; color: var(--primary); }
-
-      .doc-title {
-        font-size: 0.95rem;
-        font-weight: 600;
-      }
-
-      .doc-sub {
-        display: block;
-        margin-top: 2px;
-        color: var(--muted);
-        font-size: 0.82rem;
-      }
-
-      .empty {
-        display: none;
-        margin-top: 24px;
-        padding: 18px;
-        border-radius: 16px;
-        border: 1px dashed #c8d6ea;
-        color: var(--muted);
-        background: rgba(255,255,255,0.7);
-        text-align: center;
-      }
-
-      .footer {
-        margin-top: 28px;
-        text-align: center;
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-
-      @media (max-width: 740px) {
-        .hero {
-          padding: 24px 18px;
-        }
-
-        .stats {
-          min-width: 100%;
-          grid-template-columns: repeat(3, 1fr);
-        }
-
-        .search-row {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <main class="container">
-      <section class="hero">
-        <div class="hero-top">
-          <div>
-            <div class="eyebrow">Chemical SDS Library • GitHub Pages</div>
-            <h1>Chemical SDS Library</h1>
-            <p>
-              Browse Safety Data Sheets, Material Safety Data Sheets, and Technical Data Sheets in one organized,
-              searchable library. Use the search box to quickly find a product, then open the document in a new tab.
-            </p>
-          </div>
-
-          <div class="stats" aria-label="Repository summary">
-            <div class="stat"><strong id="totalCount">0</strong><span>Documents</span></div>
-            <div class="stat"><strong>5</strong><span>Categories</span></div>
-            <div class="stat"><strong>New tab</strong><span>Open behavior</span></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="toolbar" aria-label="Search and filters">
-        <div class="search-row">
-          <label class="search-box" for="searchInput">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M21 21L16.65 16.65M10.5 18C14.6421 18 18 14.6421 18 10.5C18 6.35786 14.6421 3 10.5 3C6.35786 3 3 6.35786 3 10.5C3 14.6421 6.35786 18 10.5 18Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <input id="searchInput" type="text" placeholder="Search by product name, category, SDS, MSDS, or TDS..." autocomplete="off" />
-          </label>
-          <div class="search-actions">
-            <button class="button" id="clearBtn" type="button">Clear search</button>
-          </div>
-        </div>
-        <div class="meta">
-          <span>Showing <strong id="visibleCount">0</strong> of <strong id="totalCountInline">0</strong> files</span>
-          <span>Click any file to open it in a new browser tab</span>
-        </div>
-      </section>
-
-      <section class="section-grid" id="catalog">
-        <article class="category" data-name="adhesives sealants epoxy loctite weicon permatex wurth">
-          <div class="category-header">
-            <h2>Adhesives &amp; Sealants</h2>
-            <span class="pill count">0</span>
-          </div>
-          <ul class="docs">
-            <li><a href="../101501_WEICON_F_Epoxy_Resin_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">101501 WEICON F Epoxy Resin</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../101502_WEICON_F_Epoxy_Hardener_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">101502 WEICON F Epoxy Hardener</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../103501_Weicon_WR2_Resin_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">103501 Weicon WR2 Resin</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../Hylomar_Universal_Blue_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Hylomar Universal Blue</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../Loctite_243_SDS.PDF" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Loctite 243</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../Loctite_401_SDS.PDF" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Loctite 401</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../Loctite_510_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Loctite 510</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../Loctite_577_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Loctite 577</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../Loctite_641_SDS.PDF" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Loctite 641</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../Permatex_Red_Silicone_81160_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Permatex Red Silicone 81160</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../Wurth_White_Silicone_SDS.PDF" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Wurth White Silicone</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../Weicon_AntiSeize_HighTech_Assembly_Paste_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Weicon AntiSeize HighTech Assembly Paste</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-            <li><a href="../Weicon_Leak_Spray_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Weicon Leak Spray</span><span class="doc-sub">SDS • Adhesives &amp; Sealants</span></span></a></li>
-          </ul>
-        </article>
-
-        <article class="category" data-name="lubricants greases oils grease cutting oil molykote skf adnocs copaslip chemico diamants">
-          <div class="category-header">
-            <h2>Lubricants &amp; Greases</h2>
-            <span class="pill count">0</span>
-          </div>
-          <ul class="docs">
-            <li><a href="../ADNOC_Grease_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">ADNOC Grease</span><span class="doc-sub">SDS • Lubricants &amp; Greases</span></span></a></li>
-            <li><a href="../Bechem_High_Lub_LT2_EP_MSDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag msds">MSDS</span><span><span class="doc-title">Bechem High Lub LT2 EP</span><span class="doc-sub">MSDS • Lubricants &amp; Greases</span></span></a></li>
-            <li><a href="../Chemico_Grinding_Paste_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Chemico Grinding Paste</span><span class="doc-sub">SDS • Lubricants &amp; Greases</span></span></a></li>
-            <li><a href="../Copaslip_AntiSeize_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Copaslip AntiSeize</span><span class="doc-sub">SDS • Lubricants &amp; Greases</span></span></a></li>
-            <li><a href="../Cutlight_VC212_Cutting_Oil_MSDS.PDF" target="_blank" rel="noopener noreferrer"><span class="tag msds">MSDS</span><span><span class="doc-title">Cutlight VC212 Cutting Oil</span><span class="doc-sub">MSDS • Lubricants &amp; Greases</span></span></a></li>
-            <li><a href="../Diamant_Lapping_Paste_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Diamant Lapping Paste</span><span class="doc-sub">SDS • Lubricants &amp; Greases</span></span></a></li>
-            <li><a href="../Molykote_111_Compound_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Molykote 111 Compound</span><span class="doc-sub">SDS • Lubricants &amp; Greases</span></span></a></li>
-            <li><a href="../Molykote_55_ORing_Grease_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Molykote 55 O-Ring Grease</span><span class="doc-sub">SDS • Lubricants &amp; Greases</span></span></a></li>
-            <li><a href="../Molykote_GnPlus_Paste_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Molykote GN Plus Paste</span><span class="doc-sub">SDS • Lubricants &amp; Greases</span></span></a></li>
-            <li><a href="../Molykote_P37_AntiSeize_Paste_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Molykote P37 AntiSeize Paste</span><span class="doc-sub">SDS • Lubricants &amp; Greases</span></span></a></li>
-            <li><a href="../SKF_LGHP2_Grease_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">SKF LGHP2 Grease</span><span class="doc-sub">SDS • Lubricants &amp; Greases</span></span></a></li>
-          </ul>
-        </article>
-
-        <article class="category" data-name="coatings paints epoxy resin hardener j0tun national weicon berger asmaco">
-          <div class="category-header">
-            <h2>Coatings &amp; Paints</h2>
-            <span class="pill count">0</span>
-          </div>
-          <ul class="docs">
-            <li><a href="../ASMACO_Spray_Paint_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">ASMACO Spray Paint</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../Berger_Luxathane_5160_Hardener_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Berger Luxathane 5160 Hardener</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../Jotun_Hardtop_XP_Component_A_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Jotun Hardtop XP Component A</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../Jotun_Hardtop_XP_Component_B_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Jotun Hardtop XP Component B</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../Jotun_Solvalitt_Aluminium_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Jotun Solvalitt Aluminium</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../National_Synthetic_Enamel_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">National Synthetic Enamel</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../National_Thinner.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">National Thinner</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../Permatex_Prussian_Blue_80038_MSDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag msds">MSDS</span><span><span class="doc-title">Permatex Prussian Blue 80038</span><span class="doc-sub">MSDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../WEICON_Keramik_BL_Hardener.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">WEICON Keramik BL Hardener</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../WEICON_Keramik_BL_Resin.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">WEICON Keramik BL Resin</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../WEICON_WL_Hardener.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">WEICON WL Hardener</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../WEICON_WL_Resin.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">WEICON WL Resin</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-            <li><a href="../WEICON_WR2_Hardener.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">WEICON WR2 Hardener</span><span class="doc-sub">SDS • Coatings &amp; Paints</span></span></a></li>
-          </ul>
-        </article>
-
-        <article class="category" data-name="cleaners corrosion rust removal diesel unispec wd40 ambersil weicon chemex">
-          <div class="category-header">
-            <h2>Cleaners, Corrosion &amp; Rust Removal</h2>
-            <span class="pill count">0</span>
-          </div>
-          <ul class="docs">
-            <li><a href="../Ambersil_Corrosion_Inhibitor_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Ambersil Corrosion Inhibitor</span><span class="doc-sub">SDS • Cleaners, Corrosion &amp; Rust Removal</span></span></a></li>
-            <li><a href="../Chemex_Degreaser_Liquid_DG226_Datasheet.pdf" target="_blank" rel="noopener noreferrer"><span class="tag tds">TDS</span><span><span class="doc-title">Chemex Degreaser Liquid DG226</span><span class="doc-sub">Datasheet • Cleaners, Corrosion &amp; Rust Removal</span></span></a></li>
-            <li><a href="../Diesel_SDS.PDF" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Diesel</span><span class="doc-sub">SDS • Cleaners, Corrosion &amp; Rust Removal</span></span></a></li>
-            <li><a href="../Unispec_Rust_Remover_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Unispec Rust Remover</span><span class="doc-sub">SDS • Cleaners, Corrosion &amp; Rust Removal</span></span></a></li>
-            <li><a href="../Unispec_Rust_Remover_TDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag tds">TDS</span><span><span class="doc-title">Unispec Rust Remover</span><span class="doc-sub">TDS • Cleaners, Corrosion &amp; Rust Removal</span></span></a></li>
-            <li><a href="../WD40_MultiUse_Product_Aerosol_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">WD-40 MultiUse Product Aerosol</span><span class="doc-sub">SDS • Cleaners, Corrosion &amp; Rust Removal</span></span></a></li>
-            <li><a href="../WD40_MultiUse_Product_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">WD-40 MultiUse Product</span><span class="doc-sub">SDS • Cleaners, Corrosion &amp; Rust Removal</span></span></a></li>
-            <li><a href="../Weicon_Cleaner_Spray_S_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Weicon Cleaner Spray S</span><span class="doc-sub">SDS • Cleaners, Corrosion &amp; Rust Removal</span></span></a></li>
-          </ul>
-        </article>
-
-        <article class="category" data-name="ndt inspection magnaflux spotcheck penetrant skc skd skl">
-          <div class="category-header">
-            <h2>NDT &amp; Inspection</h2>
-            <span class="pill count">0</span>
-          </div>
-          <ul class="docs">
-            <li><a href="../Magnaflux_Spotcheck_Penetrant_SKL_WP2_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Magnaflux Spotcheck Penetrant SKL WP2</span><span class="doc-sub">SDS • NDT &amp; Inspection</span></span></a></li>
-            <li><a href="../Magnaflux_Spotcheck_SKC_S_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Magnaflux Spotcheck SKC S</span><span class="doc-sub">SDS • NDT &amp; Inspection</span></span></a></li>
-            <li><a href="../Magnaflux_Spotcheck_SKD_S2_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Magnaflux Spotcheck SKD S2</span><span class="doc-sub">SDS • NDT &amp; Inspection</span></span></a></li>
-            <li><a href="../Magnaflux_Spotcheck_SKL_SP2_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Magnaflux Spotcheck SKL SP2</span><span class="doc-sub">SDS • NDT &amp; Inspection</span></span></a></li>
-            <li><a href="../Magnaflux_Spotcheck_SKL_WP2_SDS.pdf" target="_blank" rel="noopener noreferrer"><span class="tag sds">SDS</span><span><span class="doc-title">Magnaflux Spotcheck SKL WP2</span><span class="doc-sub">SDS • NDT &amp; Inspection</span></span></a></li>
-          </ul>
-        </article>
-      </section>
-
-      <div class="empty" id="emptyState">No documents matched your search. Try a different product name or document type.</div>
-
-      <footer class="footer">
-        <p>All documents open in a new tab for fast access. GitHub Pages-ready static index.</p>
-      </footer>
-    </main>
-
-    <script>
-      const searchInput = document.getElementById('searchInput');
-      const clearBtn = document.getElementById('clearBtn');
-      const categories = [...document.querySelectorAll('.category')];
-      const totalCount = document.getElementById('totalCount');
-      const totalCountInline = document.getElementById('totalCountInline');
-      const visibleCount = document.getElementById('visibleCount');
-      const emptyState = document.getElementById('emptyState');
-
-      const allDocs = [...document.querySelectorAll('.docs a')];
-      totalCount.textContent = allDocs.length;
-      totalCountInline.textContent = allDocs.length;
-
-      const updateCounts = () => {
-        let visible = 0;
-        categories.forEach((category) => {
-          const items = [...category.querySelectorAll('.docs li')];
-          const visibleInCategory = items.filter((li) => li.style.display !== 'none').length;
-          category.querySelector('.count').textContent = visibleInCategory;
-          if (visibleInCategory > 0) visible += visibleInCategory;
-        });
-        visibleCount.textContent = visible;
-        emptyState.style.display = visible === 0 ? 'block' : 'none';
-      };
-
-      const filterCatalog = () => {
-        const term = searchInput.value.trim().toLowerCase();
-
-        categories.forEach((category) => {
-          let categoryVisible = false;
-          [...category.querySelectorAll('.docs li')].forEach((li) => {
-            const text = li.textContent.toLowerCase();
-            const match = !term || text.includes(term) || category.dataset.name.includes(term);
-            li.style.display = match ? '' : 'none';
-            if (match) categoryVisible = true;
-          });
-          category.classList.toggle('hidden', !categoryVisible);
-        });
-
-        updateCounts();
-      };
-
-      searchInput.addEventListener('input', filterCatalog);
-      clearBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        searchInput.focus();
-        filterCatalog();
-      });
-
-      filterCatalog();
-    </script>
-  </body>
+searchInput.addEventListener('input', filterCatalog);
+clearBtn.addEventListener('click', () => { searchInput.value = ''; searchInput.focus(); filterCatalog(); });
+filterCatalog();
+</script>
+</body>
 </html>
