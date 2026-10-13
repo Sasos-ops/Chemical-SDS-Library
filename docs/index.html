@@ -50,12 +50,12 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
       <div>
         <div class="eyebrow">Chemical SDS Library &bull; GitHub Pages</div>
         <h1>Chemical SDS Library</h1>
-        <p>Browse Safety Data Sheets, Material Safety Data Sheets, and Technical Data Sheets in one organized, searchable library. Use the search box to quickly find a product, then open the document in a new tab.</p>
+        <p>Browse Safety Data Sheets, Material Safety Data Sheets, and Technical Data Sheets in one organized, searchable library. Use the search box to quickly find a product, then open the document in the viewer.</p>
       </div>
       <div class="stats">
         <div class="stat"><strong id="totalCount">0</strong><span>Documents</span></div>
         <div class="stat"><strong id="catCount">0</strong><span>Categories</span></div>
-        <div class="stat"><strong>New tab</strong><span>Open behavior</span></div>
+        <div class="stat"><strong>Viewer</strong><span>Open behavior</span></div>
       </div>
     </div>
   </section>
@@ -70,88 +70,17 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
     </div>
     <div class="meta">
       <span>Showing <strong id="visibleCount">0</strong> of <strong id="totalInline">0</strong> files</span>
-      <span>Click any file to open it in a new browser tab</span>
+      <span>Click any file to open it in the document viewer</span>
     </div>
   </section>
 
   <section class="section-grid" id="catalog"></section>
   <div class="empty" id="emptyState">No documents matched your search. Try a different product name or document type.</div>
-  <footer class="footer"><p>All documents open in a new tab.</p></footer>
+  <footer class="footer"><p>Click any document to open it in the viewer.</p></footer>
 </main>
 
+<script src="catalog.js"></script>
 <script>
-// PDFs live in the repository root, which GitHub Pages (/docs) cannot serve,
-// so each link points to the file's GitHub page and opens in a new tab.
-const BASE = 'https://github.com/Sasos-ops/Chemical-SDS-Library/blob/main/';
-
-// [file, title, type]
-const DATA = {
-  'Adhesives & Sealants': [
-    ['101501_WEICON_F_Epoxy_Resin_SDS.pdf','101501 WEICON F Epoxy Resin','SDS'],
-    ['101502_WEICON_F_Epoxy_Hardener_SDS.pdf','101502 WEICON F Epoxy Hardener','SDS'],
-    ['103501_Weicon_WR2_Resin_SDS.pdf','103501 Weicon WR2 Resin','SDS'],
-    ['Hylomar_Universal_Blue_SDS.pdf','Hylomar Universal Blue','SDS'],
-    ['Loctite_243_SDS.PDF','Loctite 243','SDS'],
-    ['Loctite_401_SDS.PDF','Loctite 401','SDS'],
-    ['Loctite_510_SDS.pdf','Loctite 510','SDS'],
-    ['Loctite_577_SDS.pdf','Loctite 577','SDS'],
-    ['Loctite_641_SDS.PDF','Loctite 641','SDS'],
-    ['Permatex_Red_Silicone_81160_SDS.pdf','Permatex Red Silicone 81160','SDS'],
-    ['Wurth_White_Silicone_SDS.PDF','Wurth White Silicone','SDS'],
-    ['Weicon_AntiSeize_HighTech_Assembly_Paste_SDS.pdf','Weicon AntiSeize HighTech Assembly Paste','SDS'],
-    ['Weicon_Leak_Spray_SDS.pdf','Weicon Leak Spray','SDS']
-  ],
-  'Lubricants & Greases': [
-    ['ADNOC_Grease_SDS.pdf','ADNOC Grease','SDS'],
-    ['Bechem_High_Lub_LT2_EP_MSDS.pdf','Bechem High Lub LT2 EP','MSDS'],
-    ['Chemico_Grinding_Paste_SDS.pdf','Chemico Grinding Paste','SDS'],
-    ['Copaslip_AntiSeize_SDS.pdf','Copaslip AntiSeize','SDS'],
-    ['Cutlight_VC212_Cutting_Oil_MSDS.PDF','Cutlight VC212 Cutting Oil','MSDS'],
-    ['Diamant_Lapping_Paste_SDS.pdf','Diamant Lapping Paste','SDS'],
-    ['Molykote_111_Compound_SDS.pdf','Molykote 111 Compound','SDS'],
-    ['Molykote_55_ORing_Grease_SDS.pdf','Molykote 55 O-Ring Grease','SDS'],
-    ['Molykote_GnPlus_Paste_SDS.pdf','Molykote GN Plus Paste','SDS'],
-    ['Molykote_P37_AntiSeize_Paste_SDS.pdf','Molykote P37 AntiSeize Paste','SDS'],
-    ['SKF_LGHP2_Grease_SDS.pdf','SKF LGHP2 Grease','SDS']
-  ],
-  'Coatings & Paints': [
-    ['ASMACO_Spray_Paint_SDS.pdf','ASMACO Spray Paint','SDS'],
-    ['Berger_Luxathane_5160_Hardener_SDS.pdf','Berger Luxathane 5160 Hardener','SDS'],
-    ['Jotun_Hardtop_XP_Component_A_SDS.pdf','Jotun Hardtop XP Component A','SDS'],
-    ['Jotun_Hardtop_XP_Component_B_SDS.pdf','Jotun Hardtop XP Component B','SDS'],
-    ['Jotun_Solvalitt_Aluminium_SDS.pdf','Jotun Solvalitt Aluminium','SDS'],
-    ['National_Synthetic_Enamel_SDS.pdf','National Synthetic Enamel','SDS'],
-    ['National_Thinner.pdf','National Thinner','SDS'],
-    ['Permatex_Prussian_Blue_80038_MSDS.pdf','Permatex Prussian Blue 80038','MSDS'],
-    ['WEICON_Keramik_BL_Hardener.pdf','WEICON Keramik BL Hardener','SDS'],
-    ['WEICON_Keramik_BL_Resin.pdf','WEICON Keramik BL Resin','SDS'],
-    ['WEICON_WL_Hardener.pdf','WEICON WL Hardener','SDS'],
-    ['WEICON_WL_Resin.pdf','WEICON WL Resin','SDS'],
-    ['WEICON_WR2_Hardener.pdf','WEICON WR2 Hardener','SDS']
-  ],
-  'Cleaners, Corrosion & Rust Removal': [
-    ['Ambersil_Corrosion_Inhibitor_SDS.pdf','Ambersil Corrosion Inhibitor','SDS'],
-    ['Chemex_Degreaser_Liquid_DG226_Datasheet.pdf','Chemex Degreaser Liquid DG226','TDS'],
-    ['Diesel_SDS.PDF','Diesel','SDS'],
-    ['Unispec_Rust_Remover_SDS.pdf','Unispec Rust Remover','SDS'],
-    ['Unispec_Rust_Remover_TDS.pdf','Unispec Rust Remover','TDS'],
-    ['WD40_MultiUse_Product_Aerosol_SDS.pdf','WD-40 MultiUse Product Aerosol','SDS'],
-    ['WD40_MultiUse_Product_SDS.pdf','WD-40 MultiUse Product','SDS'],
-    ['Weicon_Cleaner_Spray_S_SDS.pdf','Weicon Cleaner Spray S','SDS']
-  ],
-  'NDT & Inspection': [
-    ['Magnaflux_Spotcheck_Penetrant_SKL_WP2_SDS.pdf','Magnaflux Spotcheck Penetrant SKL WP2','SDS'],
-    ['Magnaflux_Spotcheck_SKC_S_SDS.pdf','Magnaflux Spotcheck SKC S','SDS'],
-    ['Magnaflux_Spotcheck_SKD_S2_SDS.pdf','Magnaflux Spotcheck SKD S2','SDS'],
-    ['Magnaflux_Spotcheck_SKL_SP2_SDS.pdf','Magnaflux Spotcheck SKL SP2','SDS'],
-    ['Magnaflux_Spotcheck_SKL_WP2_SDS.pdf','Magnaflux Spotcheck SKL WP2','SDS']
-  ],
-  'Corrosion Inhibitors (Cortec)': [
-    ['Cortec_VpCI_368_SDS.pdf','Cortec VpCI 368','SDS'],
-    ['Cortec_VpCI_414_SDS.pdf','Cortec VpCI 414','SDS']
-  ]
-};
-
 const catalog = document.getElementById('catalog');
 const searchInput = document.getElementById('searchInput');
 const clearBtn = document.getElementById('clearBtn');
@@ -168,9 +97,9 @@ Object.entries(DATA).forEach(([cat, items]) => {
   const ul = art.querySelector('.docs');
   items.forEach(([file, title, type]) => {
     const li = document.createElement('li');
-    const href = BASE + encodeURIComponent(file);
+    const href = 'viewer.html?file=' + encodeURIComponent(file);
     li.dataset.search = (title + ' ' + type + ' ' + cat + ' ' + file).toLowerCase();
-    li.innerHTML = '<a href="' + href + '" target="_blank" rel="noopener noreferrer"><span class="tag ' + type.toLowerCase() + '">' + type + '</span><span><span class="doc-title">' + esc(title) + '</span><span class="doc-sub">' + type + ' &bull; ' + esc(cat) + '</span></span></a>';
+    li.innerHTML = '<a href="' + href + '"><span class="tag ' + type.toLowerCase() + '">' + type + '</span><span><span class="doc-title">' + esc(title) + '</span><span class="doc-sub">' + type + ' &bull; ' + esc(cat) + '</span></span></a>';
     ul.appendChild(li);
   });
   catalog.appendChild(art);
