@@ -7,7 +7,7 @@
 <style>
 :root{--bg:#f3f6fb;--panel:rgba(255,255,255,.88);--primary:#123b73;--primary-2:#1f5aa6;--text:#172033;--muted:#5d6a80;--border:#dbe4f0;--shadow:0 18px 40px rgba(18,59,115,.12)}
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);background:radial-gradient(circle at top left,rgba(18,59,115,.14),transparent 35%),radial-gradient(circle at top right,rgba(31,90,166,.12),transparent 28%),var(--bg)}
+body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);background:radial-gradient(circle at top left,rgba(18,59,115,.14),transparent 35%),radial-gradient(circle at top right,rgba(31,90,166,.12),transparent 35%),var(--bg)}
 .container{max-width:1280px;margin:0 auto;padding:28px 18px 64px}
 .hero{border-radius:26px;padding:34px 30px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:var(--shadow)}
 .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
@@ -29,7 +29,7 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
 .category.hidden{display:none}
 .category-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
 .category h2{margin:0;font-size:1.08rem;color:var(--primary)}
-.pill{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:28px;padding:0 10px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:.8rem;font-weight:800}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:28px;padding:0 10px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:.8rem;font-weight:700}
 .docs{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .docs li{border-radius:14px;border:1px solid var(--border);background:#fff;transition:.18s}
 .docs li:hover{transform:translateY(-1px);border-color:#bfcde2;box-shadow:0 10px 18px rgba(18,59,115,.08)}
@@ -50,7 +50,7 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
       <div>
         <div class="eyebrow">Chemical SDS Library &bull; GitHub Pages</div>
         <h1>Chemical SDS Library</h1>
-        <p>Browse Safety Data Sheets, Material Safety Data Sheets, and Technical Data Sheets in one organized, searchable library. Use the search box to quickly find a product, then open the document directly in a new tab.</p>
+        <p>Browse Safety Data Sheets, Material Safety Data Sheets, and Technical Data Sheets in one organized, searchable library. Use the search box to quickly find a product, then click the document to view it in a new tab.</p>
       </div>
       <div class="stats">
         <div class="stat"><strong id="totalCount">0</strong><span>Documents</span></div>
@@ -70,7 +70,7 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
     </div>
     <div class="meta">
       <span>Showing <strong id="visibleCount">0</strong> of <strong id="totalInline">0</strong> files</span>
-      <span>Click any file to open it in a new browser tab</span>
+      <span>Click any file to view it in a new browser tab</span>
     </div>
   </section>
 
@@ -80,8 +80,10 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
 </main>
 
 <script>
-// PDFs live in the repository root (not in /docs), so link to them directly from the repo.
-const BASE = 'https://github.com/Sasos-ops/Chemical-SDS-Library/raw/main/';
+// PDFs live in the repository root (not in /docs).
+// raw.githubusercontent.com allows cross-origin fetch (CORS), so we fetch the file
+// and re-wrap it as application/pdf so the browser DISPLAYS it instead of downloading.
+const BASE = 'https://raw.githubusercontent.com/Sasos-ops/Chemical-SDS-Library/main/';
 
 // [file, title, type]
 const DATA = {
@@ -169,7 +171,7 @@ Object.entries(DATA).forEach(([cat, items]) => {
     const li = document.createElement('li');
     const href = BASE + encodeURIComponent(file);
     li.dataset.search = (title + ' ' + type + ' ' + cat + ' ' + file).toLowerCase();
-    li.innerHTML = '<a href="' + href + '" target="_blank" rel="noopener noreferrer"><span class="tag ' + type.toLowerCase() + '">' + type + '</span><span><span class="doc-title">' + esc(title) + '</span><span class="doc-sub">' + esc(file) + '</span></span></a>';
+    li.innerHTML = '<a class="doc-link" href="' + href + '" data-file="' + esc(file) + '" target="_blank" rel="noopener noreferrer"><span class="tag ' + type.toLowerCase() + '">' + type + '</span><span><span class="doc-title">' + esc(title) + '</span><span class="doc-sub">' + esc(cat) + '</span></span></a>';
     ul.appendChild(li);
   });
   catalog.appendChild(art);
@@ -178,6 +180,33 @@ Object.entries(DATA).forEach(([cat, items]) => {
 document.getElementById('totalCount').textContent = total;
 document.getElementById('totalInline').textContent = total;
 document.getElementById('catCount').textContent = Object.keys(DATA).length;
+
+// ---- Open PDF inline in a new tab (no download) ----
+const blobCache = {};
+catalog.addEventListener('click', async (e) => {
+  const a = e.target.closest('a.doc-link');
+  if (!a) return;
+  e.preventDefault();
+  const file = a.dataset.file;
+  const url = BASE + encodeURIComponent(file);
+
+  // Open the tab synchronously (inside the click) so popup blockers allow it.
+  const w = window.open('', '_blank');
+  if (!w) { window.location.href = url; return; }
+  w.document.write('<title>Loading...</title><body style="font-family:Arial,sans-serif;padding:2rem">Loading document&hellip;</body>');
+
+  try {
+    if (!blobCache[file]) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const buf = await res.arrayBuffer();
+      blobCache[file] = URL.createObjectURL(new Blob([buf], { type: 'application/pdf' }));
+    }
+    w.location.href = blobCache[file];
+  } catch (err) {
+    w.location.href = url; // fallback
+  }
+});
 
 function filterCatalog() {
   const term = searchInput.value.trim().toLowerCase();
