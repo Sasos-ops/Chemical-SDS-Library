@@ -24,23 +24,18 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
 .search-box input{width:100%;border:0;outline:none;font-size:1rem;color:var(--text);background:transparent}
 .button{border:1px solid var(--border);background:#fff;color:var(--text);border-radius:12px;padding:12px 14px;font-weight:700;cursor:pointer}
 .meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 4px 0;color:var(--muted);font-size:.92rem}
-.section-grid{margin-top:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;align-items:start}
-.category{background:var(--panel);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
-.category.hidden{display:none}
-.category-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
-.category h2{margin:0;font-size:1.08rem;color:var(--primary)}
-.pill{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:28px;padding:0 10px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:.8rem;font-weight:800}
-.docs{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.docs li{border-radius:14px;border:1px solid var(--border);background:#fff;transition:.18s}
-.docs li:hover{transform:translateY(-1px);border-color:#bfcde2;box-shadow:0 10px 18px rgba(18,59,115,.08)}
-.docs a{display:flex;align-items:center;gap:12px;padding:12px 14px;color:var(--text);text-decoration:none;line-height:1.45}
-.tag{display:inline-flex;justify-content:center;min-width:54px;padding:5px 10px;border-radius:999px;font-size:.72rem;font-weight:800;text-transform:uppercase}
-.tag.sds{background:#e5f7f2;color:#0f7a6d}.tag.msds{background:#fff2df;color:#b76a1f}.tag.tds{background:#e8f0ff;color:var(--primary)}
-.doc-title{display:block;font-size:.95rem;font-weight:600}
-.doc-sub{display:block;margin-top:2px;color:var(--muted);font-size:.82rem}
+.table-wrap{margin-top:24px;overflow-x:auto;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;text-align:left}
+thead{background:#eef4ff;color:var(--primary)}
+th,td{padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+th{font-size:.9rem}
+tbody tr:hover{background:#f8fbff}
+.open-link{display:inline-block;padding:8px 12px;border-radius:8px;background:#0f7a6d;color:#fff;text-decoration:none;font-weight:700;font-size:.88rem;white-space:nowrap}
+.open-link:hover{background:#0c6258}
+.open-link:focus{outline:3px solid rgba(15,122,109,.22);outline-offset:2px}
 .empty{display:none;margin-top:24px;padding:18px;border-radius:16px;border:1px dashed #c8d6ea;color:var(--muted);background:rgba(255,255,255,.7);text-align:center}
 .footer{margin-top:28px;text-align:center;color:var(--muted);font-size:.9rem}
-@media(max-width:740px){.hero{padding:24px 18px}.stats{min-width:100%}.search-row{grid-template-columns:1fr}}
+@media(max-width:740px){.hero{padding:24px 18px}.stats{min-width:100%}.search-row{grid-template-columns:1fr}th,td{padding:12px 10px}}
 </style>
 </head>
 <body>
@@ -50,12 +45,12 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
       <div>
         <div class="eyebrow">Chemical SDS Library &bull; GitHub Pages</div>
         <h1>Chemical SDS Library</h1>
-        <p>Browse Safety Data Sheets, Material Safety Data Sheets, and Technical Data Sheets in one organized, searchable library. Use the search box to quickly find a product, then open the document in GitHub's built-in preview.</p>
+        <p>Browse Safety Data Sheets, Material Safety Data Sheets, and Technical Data Sheets in one searchable table. Find a document and open its PDF in a new tab.</p>
       </div>
       <div class="stats">
         <div class="stat"><strong id="totalCount">0</strong><span>Documents</span></div>
         <div class="stat"><strong id="catCount">0</strong><span>Categories</span></div>
-        <div class="stat"><strong>GitHub</strong><span>PDF preview</span></div>
+        <div class="stat"><strong>PDF</strong><span>Browser preview</span></div>
       </div>
     </div>
   </section>
@@ -70,19 +65,25 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
     </div>
     <div class="meta">
       <span>Showing <strong id="visibleCount">0</strong> of <strong id="totalInline">0</strong> files</span>
-      <span>Click any file to open it in GitHub's preview in this tab</span>
+      <span>Click “Open PDF” to view a document in a new tab</span>
     </div>
   </section>
 
-  <section class="section-grid" id="catalog"></section>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Product</th><th>Category</th><th>Type</th><th>PDF File</th><th>Open</th></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
   <div class="empty" id="emptyState">No documents matched your search. Try a different product name or document type.</div>
-  <footer class="footer"><p>Documents open in GitHub's built-in PDF preview.</p></footer>
+  <footer class="footer"><p>PDFs open directly in your browser’s built-in viewer.</p></footer>
 </main>
 
 <script>
-// PDFs live in the repository root, which GitHub Pages (/docs) cannot serve,
-// so each link points to the file's GitHub page for its built-in preview.
-const BASE = 'https://github.com/Sasos-ops/Chemical-SDS-Library/blob/main/';
+// PDFs are stored in the repository root, so use their direct raw-file URLs.
+const BASE = 'https://raw.githubusercontent.com/Sasos-ops/Chemical-SDS-Library/main/';
 
 // [file, title, type]
 const DATA = {
@@ -152,50 +153,32 @@ const DATA = {
   ]
 };
 
-const catalog = document.getElementById('catalog');
 const searchInput = document.getElementById('searchInput');
 const clearBtn = document.getElementById('clearBtn');
 const emptyState = document.getElementById('emptyState');
+const tableBody = document.getElementById('tableBody');
 
 const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-let total = 0;
+const documents = Object.entries(DATA).flatMap(([category, items]) =>
+  items.map(([file, title, type]) => ({ file, title, type, category }))
+);
 
-Object.entries(DATA).forEach(([cat, items]) => {
-  total += items.length;
-  const art = document.createElement('article');
-  art.className = 'category';
-  art.innerHTML = '<div class="category-header"><h2>' + esc(cat) + '</h2><span class="pill count">0</span></div><ul class="docs"></ul>';
-  const ul = art.querySelector('.docs');
-  items.forEach(([file, title, type]) => {
-    const li = document.createElement('li');
-    const href = BASE + encodeURIComponent(file);
-    li.dataset.search = (title + ' ' + type + ' ' + cat + ' ' + file).toLowerCase();
-    li.innerHTML = '<a href="' + href + '"><span class="tag ' + type.toLowerCase() + '">' + type + '</span><span><span class="doc-title">' + esc(title) + '</span><span class="doc-sub">' + type + ' &bull; ' + esc(cat) + '</span></span></a>';
-    ul.appendChild(li);
-  });
-  catalog.appendChild(art);
-});
-
+const total = documents.length;
 document.getElementById('totalCount').textContent = total;
 document.getElementById('totalInline').textContent = total;
 document.getElementById('catCount').textContent = Object.keys(DATA).length;
 
 function filterCatalog() {
   const term = searchInput.value.trim().toLowerCase();
-  let visible = 0;
-  catalog.querySelectorAll('.category').forEach(cat => {
-    let n = 0;
-    cat.querySelectorAll('.docs li').forEach(li => {
-      const show = !term || li.dataset.search.includes(term);
-      li.style.display = show ? '' : 'none';
-      if (show) n++;
-    });
-    cat.querySelector('.count').textContent = n;
-    cat.classList.toggle('hidden', n === 0);
-    visible += n;
-  });
-  document.getElementById('visibleCount').textContent = visible;
-  emptyState.style.display = visible === 0 ? 'block' : 'none';
+  const matches = documents.filter(({ file, title, type, category }) =>
+    !term || (title + ' ' + type + ' ' + category + ' ' + file).toLowerCase().includes(term)
+  );
+  tableBody.innerHTML = matches.map(({ file, title, type, category }, index) => {
+    const href = BASE + encodeURIComponent(file);
+    return '<tr><td>' + (index + 1) + '</td><td>' + esc(title) + '</td><td>' + esc(category) + '</td><td>' + esc(type) + '</td><td>' + esc(file) + '</td><td><a class="open-link" href="' + href + '" target="_blank" rel="noopener noreferrer">Open PDF</a></td></tr>';
+  }).join('');
+  document.getElementById('visibleCount').textContent = matches.length;
+  emptyState.style.display = matches.length === 0 ? 'block' : 'none';
 }
 
 searchInput.addEventListener('input', filterCatalog);
