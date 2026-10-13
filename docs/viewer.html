@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chemical SDS Document Viewer</title>
+<style>
+:root{--bg:#f3f6fb;--panel:rgba(255,255,255,.88);--primary:#123b73;--primary-2:#1f5aa6;--text:#172033;--muted:#5d6a80;--border:#dbe4f0;--shadow:0 18px 40px rgba(18,59,115,.12)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);background:radial-gradient(circle at top left,rgba(18,59,115,.14),transparent 35%),radial-gradient(circle at top right,rgba(15,122,109,.12),transparent 30%),linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%)}
+.container{max-width:1280px;margin:0 auto;padding:28px 18px 64px}
+.hero{border-radius:26px;padding:34px 30px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:var(--shadow)}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.eyebrow{display:inline-block;padding:7px 12px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(255,255,255,.08);font-size:.82rem;margin-bottom:16px}
+.eyebrow a{color:#fff;text-decoration:none}
+.eyebrow a:hover{text-decoration:underline}
+h1{margin:0 0 10px;font-size:clamp(1.8rem,3.6vw,2.8rem);line-height:1.15;word-break:break-word}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.hero-category{font-size:.92rem;color:rgba(255,255,255,.9)}
+.hero-filename{font-size:.82rem;color:rgba(255,255,255,.82);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:rgba(0,0,0,.15);padding:4px 8px;border-radius:6px;word-break:break-all}
+.toolbar{position:sticky;top:0;z-index:10;margin:22px 0 0;padding:12px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.92);box-shadow:var(--shadow)}
+.toolbar-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.toolbar-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.button{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:12px;padding:10px 14px;font-weight:700;font-size:.9rem;text-decoration:none;cursor:pointer;transition:.18s;line-height:1.2}
+.button:hover{transform:translateY(-1px);border-color:#bfcde2;box-shadow:0 6px 14px rgba(18,59,115,.08)}
+.button.button-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.button.button-primary:hover{background:var(--primary-2);border-color:var(--primary-2)}
+.viewer-layout{margin-top:24px;display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:22px;align-items:start}
+.main-column{min-width:0}
+.pdf-card{background:var(--panel);border:1px solid var(--border);border-radius:22px;padding:16px;box-shadow:var(--shadow)}
+.pdf-frame{width:100%;height:80vh;min-height:540px;border:1px solid var(--border);border-radius:14px;background:#fff;display:block}
+.pdf-fallback{margin-top:14px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.9);border:1px dashed #c8d6ea;color:var(--muted);font-size:.88rem;text-align:center;line-height:1.5}
+.pdf-fallback a{color:var(--primary);font-weight:700;text-decoration:none}
+.pdf-fallback a:hover{text-decoration:underline}
+.sidebar{display:flex;flex-direction:column;gap:22px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:22px;padding:20px;box-shadow:var(--shadow)}
+.card-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.card h2,.card h3{margin:0;font-size:1.08rem;color:var(--primary)}
+.meta-table{width:100%;border-collapse:collapse;font-size:.88rem}
+.meta-table tr{border-bottom:1px solid var(--border)}
+.meta-table tr:last-child{border-bottom:0}
+.meta-table th{text-align:left;padding:10px 0;color:var(--muted);font-weight:500;width:35%;vertical-align:top}
+.meta-table td{padding:10px 0;color:var(--text);font-weight:600;word-break:break-word}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:26px;padding:0 9px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:.78rem;font-weight:800}
+.docs{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-height:520px;overflow-y:auto}
+.docs li{border-radius:14px;border:1px solid var(--border);background:#fff;transition:.18s}
+.docs li:not(.current):hover{transform:translateY(-1px);border-color:#bfcde2;box-shadow:0 10px 18px rgba(18,59,115,.08)}
+.docs li.current{border-color:var(--primary-2);background:#eef4ff;box-shadow:0 0 0 2px rgba(31,90,166,.15)}
+.docs a,.docs .current-item{display:flex;align-items:center;gap:12px;padding:12px 14px;color:var(--text);text-decoration:none;line-height:1.45}
+.docs .current-item{cursor:default}
+.tag{display:inline-flex;justify-content:center;min-width:54px;padding:5px 10px;border-radius:999px;font-size:.72rem;font-weight:800;text-transform:uppercase}
+.tag.sds{background:#e5f7f2;color:#0f7a6d}.tag.msds{background:#fff2df;color:#b76a1f}.tag.tds{background:#e8f0ff;color:var(--primary)}
+.doc-title{display:block;font-size:.95rem;font-weight:600}
+.doc-sub{display:block;margin-top:2px;color:var(--muted);font-size:.82rem}
+.current-badge{display:inline-block;margin-top:2px;font-size:.74rem;color:var(--primary);font-weight:700}
+.empty-hero{text-align:center;padding:48px 24px}
+.empty-hero p{margin:12px auto 24px;max-width:600px;color:rgba(255,255,255,.9);font-size:1.05rem;line-height:1.6}
+.footer{margin-top:28px;text-align:center;color:var(--muted);font-size:.9rem}
+@media(max-width:980px){.viewer-layout{grid-template-columns:1fr}}
+@media(max-width:740px){.hero{padding:24px 18px}.toolbar-row{flex-direction:column;align-items:stretch}.toolbar-group{justify-content:stretch}.toolbar-group .button{flex:1}.pdf-frame{height:65vh;min-height:420px}}
+</style>
+</head>
+<body>
+<main class="container">
+  <!-- Document not found state -->
+  <section class="hero empty-hero" id="notFoundState" style="display:none;">
+    <div class="eyebrow"><a href="index.html">Chemical SDS Library</a> &bull; Document Viewer</div>
+    <h1>Document Not Found</h1>
+    <p>The requested document could not be found or is not registered in the chemical library catalog.</p>
+    <div>
+      <a href="index.html" class="button button-primary" style="background:#fff;color:var(--primary);border-color:#fff;">&larr; Back to library</a>
+    </div>
+  </section>
+
+  <!-- Document viewer content -->
+  <div id="viewerContent" style="display:none;">
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="eyebrow"><a href="index.html">Chemical SDS Library</a> &bull; <span id="heroCategory"></span></div>
+          <h1 id="heroTitle">Product Name</h1>
+          <div class="hero-meta">
+            <span id="heroTypeTag" class="tag"></span>
+            <span id="heroCategoryText" class="hero-category"></span>
+            <span id="heroFileName" class="hero-filename"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="toolbar-row">
+        <div>
+          <a href="index.html" class="button button-primary">&larr; Back to library</a>
+        </div>
+        <div class="toolbar-group">
+          <a id="openTabBtn" href="#" target="_blank" rel="noopener noreferrer" class="button">Open PDF in new tab</a>
+          <a id="downloadBtn" href="#" download class="button">Download</a>
+          <button id="printBtn" type="button" class="button">Print</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="viewer-layout">
+      <section class="main-column">
+        <div class="pdf-card">
+          <iframe id="pdfFrame" class="pdf-frame" src="" title="PDF Document Viewer">
+            <p>Your browser does not support inline PDF viewing. <a id="innerFallbackLink" href="#" target="_blank" rel="noopener noreferrer">Click here to open the PDF</a> or download it.</p>
+          </iframe>
+          <div class="pdf-fallback">
+            <span>Unable to display PDF inline in your browser?</span>
+            <a id="fallbackOpenBtn" href="#" target="_blank" rel="noopener noreferrer">Open PDF in new tab</a>
+            <span>&bull;</span>
+            <a id="fallbackDownloadBtn" href="#" download>Download PDF file</a>
+          </div>
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <div class="card">
+          <div class="card-header">
+            <h3>Document Details</h3>
+          </div>
+          <table class="meta-table">
+            <tbody>
+              <tr>
+                <th>Product</th>
+                <td id="metaProduct"></td>
+              </tr>
+              <tr>
+                <th>Category</th>
+                <td id="metaCategory"></td>
+              </tr>
+              <tr>
+                <th>Document Type</th>
+                <td><span id="metaTypeTag" class="tag"></span></td>
+              </tr>
+              <tr>
+                <th>File Name</th>
+                <td id="metaFileName"></td>
+              </tr>
+              <tr>
+                <th>File Size</th>
+                <td id="metaFileSize">&mdash;</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Other in this category</h3>
+            <span class="pill" id="catItemCount">0</span>
+          </div>
+          <ul class="docs" id="relatedDocs"></ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p><a href="index.html" style="color:var(--primary);text-decoration:none;">Chemical SDS Library</a> &bull; Safety &amp; Technical Documentation</p>
+  </footer>
+</main>
+
+<script src="catalog.js"></script>
+<script>
+const FILE_SIZES = {
+  "101501_WEICON_F_Epoxy_Resin_SDS.pdf": 281285,
+  "101502_WEICON_F_Epoxy_Hardener_SDS.pdf": 277062,
+  "103501_Weicon_WR2_Resin_SDS.pdf": 274225,
+  "ADNOC_Grease_SDS.pdf": 23451,
+  "ASMACO_Spray_Paint_SDS.pdf": 196532,
+  "Ambersil_Corrosion_Inhibitor_SDS.pdf": 407319,
+  "Bechem_High_Lub_LT2_EP_MSDS.pdf": 91522,
+  "Berger_Luxathane_5160_Hardener_SDS.pdf": 109686,
+  "Chemex_Degreaser_Liquid_DG226_Datasheet.pdf": 66025,
+  "Chemico_Grinding_Paste_SDS.pdf": 463937,
+  "Copaslip_AntiSeize_SDS.pdf": 293223,
+  "Cortec_VpCI_368_SDS.pdf": 3157583,
+  "Cortec_VpCI_414_SDS.pdf": 3454895,
+  "Cutlight_VC212_Cutting_Oil_MSDS.PDF": 32108,
+  "Diamant_Lapping_Paste_SDS.pdf": 666914,
+  "Diesel_SDS.PDF": 451217,
+  "Hylomar_Universal_Blue_SDS.pdf": 173269,
+  "Jotun_Hardtop_XP_Component_A_SDS.pdf": 183944,
+  "Jotun_Hardtop_XP_Component_B_SDS.pdf": 177134,
+  "Jotun_Solvalitt_Aluminium_SDS.pdf": 229154,
+  "Loctite_243_SDS.PDF": 478666,
+  "Loctite_401_SDS.PDF": 297590,
+  "Loctite_510_SDS.pdf": 384342,
+  "Loctite_577_SDS.pdf": 462589,
+  "Loctite_641_SDS.PDF": 369581,
+  "Magnaflux_Spotcheck_Penetrant_SKL_WP2_SDS.pdf": 559577,
+  "Magnaflux_Spotcheck_SKC_S_SDS.pdf": 427479,
+  "Magnaflux_Spotcheck_SKD_S2_SDS.pdf": 333202,
+  "Magnaflux_Spotcheck_SKL_SP2_SDS.pdf": 399099,
+  "Magnaflux_Spotcheck_SKL_WP2_SDS.pdf": 415776,
+  "Molykote_111_Compound_SDS.pdf": 144848,
+  "Molykote_55_ORing_Grease_SDS.pdf": 252428,
+  "Molykote_GnPlus_Paste_SDS.pdf": 250148,
+  "Molykote_P37_AntiSeize_Paste_SDS.pdf": 257883,
+  "National_Synthetic_Enamel_SDS.pdf": 512103,
+  "National_Thinner.pdf": 1097285,
+  "Permatex_Prussian_Blue_80038_MSDS.pdf": 184090,
+  "Permatex_Red_Silicone_81160_SDS.pdf": 382003,
+  "SKF_LGHP2_Grease_SDS.pdf": 109230,
+  "Unispec_Rust_Remover_SDS.pdf": 249091,
+  "Unispec_Rust_Remover_TDS.pdf": 865386,
+  "WD40_MultiUse_Product_Aerosol_SDS.pdf": 230619,
+  "WD40_MultiUse_Product_SDS.pdf": 290678,
+  "WEICON_Keramik_BL_Hardener.pdf": 270168,
+  "WEICON_Keramik_BL_Resin.pdf": 280161,
+  "WEICON_WL_Hardener.pdf": 311111,
+  "WEICON_WL_Resin.pdf": 289055,
+  "WEICON_WR2_Hardener.pdf": 310031,
+  "Weicon_AntiSeize_HighTech_Assembly_Paste_SDS.pdf": 153171,
+  "Weicon_Cleaner_Spray_S_SDS.pdf": 235930,
+  "Weicon_Leak_Spray_SDS.pdf": 169551,
+  "Wurth_White_Silicone_SDS.PDF": 255000
+};
+
+function formatBytes(bytes) {
+  if (!bytes || isNaN(bytes)) return '—';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function initViewer() {
+  const params = new URLSearchParams(window.location.search);
+  const fileParam = params.get('file');
+
+  const notFoundState = document.getElementById('notFoundState');
+  const viewerContent = document.getElementById('viewerContent');
+
+  if (!fileParam || typeof DATA === 'undefined') {
+    notFoundState.style.display = 'block';
+    document.title = 'Document Not Found - Chemical SDS Library';
+    return;
+  }
+
+  let matchedDoc = null;
+  let matchedCategory = null;
+
+  for (const [category, items] of Object.entries(DATA)) {
+    for (const item of items) {
+      if (item[0] === fileParam) {
+        matchedDoc = item;
+        matchedCategory = category;
+        break;
+      }
+    }
+    if (matchedDoc) break;
+  }
+
+  if (!matchedDoc) {
+    notFoundState.style.display = 'block';
+    document.title = 'Document Not Found - Chemical SDS Library';
+    return;
+  }
+
+  const [fileName, productTitle, docType] = matchedDoc;
+  const pdfUrl = 'pdfs/' + encodeURIComponent(fileName);
+
+  // Set page title to product name
+  document.title = productTitle;
+
+  // Show viewer
+  viewerContent.style.display = 'block';
+
+  // Populate hero
+  document.getElementById('heroTitle').textContent = productTitle;
+  document.getElementById('heroCategory').textContent = matchedCategory;
+  document.getElementById('heroCategoryText').textContent = matchedCategory;
+  document.getElementById('heroFileName').textContent = fileName;
+
+  const heroTypeTag = document.getElementById('heroTypeTag');
+  heroTypeTag.className = 'tag ' + docType.toLowerCase();
+  heroTypeTag.textContent = docType;
+
+  // Populate toolbar buttons
+  const openTabBtn = document.getElementById('openTabBtn');
+  openTabBtn.href = pdfUrl;
+
+  const downloadBtn = document.getElementById('downloadBtn');
+  downloadBtn.href = pdfUrl;
+  downloadBtn.download = fileName;
+
+  const printBtn = document.getElementById('printBtn');
+  printBtn.addEventListener('click', () => {
+    const iframe = document.getElementById('pdfFrame');
+    try {
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        return;
+      }
+    } catch (e) {
+      // Cross-origin restriction fallback
+    }
+    const printWindow = window.open(pdfUrl, '_blank');
+    if (printWindow) {
+      printWindow.addEventListener('load', () => {
+        printWindow.print();
+      });
+    }
+  });
+
+  // Populate iframe & fallbacks
+  const pdfFrame = document.getElementById('pdfFrame');
+  pdfFrame.src = pdfUrl;
+  pdfFrame.title = productTitle;
+
+  const innerFallbackLink = document.getElementById('innerFallbackLink');
+  innerFallbackLink.href = pdfUrl;
+
+  const fallbackOpenBtn = document.getElementById('fallbackOpenBtn');
+  fallbackOpenBtn.href = pdfUrl;
+
+  const fallbackDownloadBtn = document.getElementById('fallbackDownloadBtn');
+  fallbackDownloadBtn.href = pdfUrl;
+  fallbackDownloadBtn.download = fileName;
+
+  // Populate metadata panel
+  document.getElementById('metaProduct').textContent = productTitle;
+  document.getElementById('metaCategory').textContent = matchedCategory;
+  document.getElementById('metaFileName').textContent = fileName;
+
+  const metaTypeTag = document.getElementById('metaTypeTag');
+  metaTypeTag.className = 'tag ' + docType.toLowerCase();
+  metaTypeTag.textContent = docType;
+
+  const metaFileSize = document.getElementById('metaFileSize');
+  if (FILE_SIZES[fileName]) {
+    metaFileSize.textContent = formatBytes(FILE_SIZES[fileName]);
+  } else {
+    metaFileSize.textContent = '—';
+  }
+
+  // Attempt HEAD request for dynamic size if not matched or to verify
+  fetch(pdfUrl, { method: 'HEAD' })
+    .then(res => {
+      if (res.ok) {
+        const len = res.headers.get('content-length');
+        if (len) {
+          metaFileSize.textContent = formatBytes(parseInt(len, 10));
+        }
+      }
+    })
+    .catch(() => {
+      // Keep static size if HEAD fails
+    });
+
+  // Populate "Other documents in this category"
+  const catItems = DATA[matchedCategory] || [];
+  document.getElementById('catItemCount').textContent = catItems.length;
+
+  const relatedDocs = document.getElementById('relatedDocs');
+  catItems.forEach(([itemFile, itemTitle, itemType]) => {
+    const li = document.createElement('li');
+    const isCurrent = (itemFile === fileName);
+    if (isCurrent) {
+      li.className = 'current';
+      li.innerHTML = '<div class="current-item" aria-current="page">' +
+        '<span class="tag ' + itemType.toLowerCase() + '">' + itemType + '</span>' +
+        '<span>' +
+          '<span class="doc-title">' + esc(itemTitle) + '</span>' +
+          '<span class="current-badge">&bull; Currently viewing</span>' +
+        '</span>' +
+      '</div>';
+    } else {
+      const itemHref = 'viewer.html?file=' + encodeURIComponent(itemFile);
+      li.innerHTML = '<a href="' + itemHref + '">' +
+        '<span class="tag ' + itemType.toLowerCase() + '">' + itemType + '</span>' +
+        '<span>' +
+          '<span class="doc-title">' + esc(itemTitle) + '</span>' +
+          '<span class="doc-sub">' + itemType + ' &bull; ' + esc(matchedCategory) + '</span>' +
+        '</span>' +
+      '</a>';
+    }
+    relatedDocs.appendChild(li);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initViewer);
+</script>
+</body>
+</html>
