@@ -50,12 +50,12 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
       <div>
         <div class="eyebrow">Chemical SDS Library &bull; GitHub Pages</div>
         <h1>Chemical SDS Library</h1>
-        <p>Browse Safety Data Sheets, Material Safety Data Sheets, and Technical Data Sheets in one organized, searchable library. Use the search box to quickly find a product, then open the document in a new tab.</p>
+        <p>Browse Safety Data Sheets, Material Safety Data Sheets, and Technical Data Sheets in one organized, searchable library. Use the search box to quickly find a product, then open the document in GitHub's built-in preview.</p>
       </div>
       <div class="stats">
         <div class="stat"><strong id="totalCount">0</strong><span>Documents</span></div>
         <div class="stat"><strong id="catCount">0</strong><span>Categories</span></div>
-        <div class="stat"><strong>New tab</strong><span>Open behavior</span></div>
+        <div class="stat"><strong>GitHub</strong><span>PDF preview</span></div>
       </div>
     </div>
   </section>
@@ -70,18 +70,18 @@ h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.3rem);line-height:1.1}
     </div>
     <div class="meta">
       <span>Showing <strong id="visibleCount">0</strong> of <strong id="totalInline">0</strong> files</span>
-      <span>Click any file to open it in a new browser tab</span>
+      <span>Click any file to open it in GitHub's preview in this tab</span>
     </div>
   </section>
 
   <section class="section-grid" id="catalog"></section>
   <div class="empty" id="emptyState">No documents matched your search. Try a different product name or document type.</div>
-  <footer class="footer"><p>All documents open in a new tab.</p></footer>
+  <footer class="footer"><p>Documents open in GitHub's built-in PDF preview.</p></footer>
 </main>
 
 <script>
 // PDFs live in the repository root, which GitHub Pages (/docs) cannot serve,
-// so each link points to the file's GitHub page and opens in a new tab.
+// so each link points to the file's GitHub page for its built-in preview.
 const BASE = 'https://github.com/Sasos-ops/Chemical-SDS-Library/blob/main/';
 
 // [file, title, type]
@@ -170,7 +170,7 @@ Object.entries(DATA).forEach(([cat, items]) => {
     const li = document.createElement('li');
     const href = BASE + encodeURIComponent(file);
     li.dataset.search = (title + ' ' + type + ' ' + cat + ' ' + file).toLowerCase();
-    li.innerHTML = '<a href="' + href + '" target="_blank" rel="noopener noreferrer"><span class="tag ' + type.toLowerCase() + '">' + type + '</span><span><span class="doc-title">' + esc(title) + '</span><span class="doc-sub">' + type + ' &bull; ' + esc(cat) + '</span></span></a>';
+    li.innerHTML = '<a href="' + href + '"><span class="tag ' + type.toLowerCase() + '">' + type + '</span><span><span class="doc-title">' + esc(title) + '</span><span class="doc-sub">' + type + ' &bull; ' + esc(cat) + '</span></span></a>';
     ul.appendChild(li);
   });
   catalog.appendChild(art);
