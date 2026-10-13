@@ -1,1 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chemical SDS Library</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      line-height: 1.5;
+      max-width: 960px;
+    }
+    h1 { margin-bottom: .25rem; }
+    p { margin-top: 0; color: #666; }
+    .hint {
+      font-size: .95rem;
+      padding: .75rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin: 1rem 0 1.25rem;
+    }
+    ul { padding-left: 1.2rem; }
+    li { margin: 0.4rem 0; }
+    a { text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      background: rgba(127,127,127,.15);
+      padding: .1rem .35rem;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chemical SDS Library</h1>
+  <p>Safety Data Sheets (SDS), MSDS, and TDS — click any file to open in a new tab.</p>
 
+  <div class="hint">
+    To add a new PDF later, edit only the <code>pdfFiles</code> array in this file.
+  </div>
+
+  <ul id="pdf-list"></ul>
+
+  <script>
+    // Edit this list only when adding/removing files:
+    const pdfFiles = [
+      "101501_WEICON_F_Epoxy_Resin_SDS.pdf",
+      "101502_WEICON_F_Epoxy_Hardener_SDS.pdf",
+      "103501_Weicon_WR2_Resin_SDS.pdf",
+      "ADNOC_Grease_SDS.pdf",
+      "ASMACO_Spray_Paint_SDS.pdf",
+      "Ambersil_Corrosion_Inhibitor_SDS.pdf"
+    ];
+
+    const repoBase = "/Chemical-SDS-Library/";
+    const list = document.getElementById("pdf-list");
+
+    const toLabel = (filename) =>
+      filename
+        .replace(/\.pdf$/i, "")
+        .replace(/_/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    pdfFiles
+      .slice()
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }))
+      .forEach(file => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = repoBase + encodeURIComponent(file).replace(/%2F/g, "/");
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = toLabel(file);
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+  </script>
+</body>
+</html>
